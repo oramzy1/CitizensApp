@@ -1,0 +1,22 @@
+<!-- <?xml version='1.0' encoding='utf-8'?>
+<widget id="com.example.citizensapp" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>CitizensApp</name>
+    <description>Sample Apache Cordova App</description>
+    <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
+        Apache Cordova Team
+    </author>
+    <content src="index.html" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+</widget> -->
+
+
+<widget id="com.example.citizenreporting" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+  <name>CitizenReportingApp</name>
+  <description>A citizen reporting app for incidents</description>
+  <author email="you@example.com">Oramabo Gift</author>
+  <content src="index.html" />
+  <access origin="*" />
+  <plugin name="cordova-plugin-geolocation" />
+  <plugin name="cordova-plugin-camera" />
+</widget>

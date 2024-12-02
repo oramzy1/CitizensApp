@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>User Posts</title>
+    <link rel="stylesheet" href="../css/index.css" />
+  </head>
+  <body>
+    <div class="home-container">
+      <nav>
+        <a href="./user_post.html"><img src="../img/plex-chevron.png" height="50" alt="Logo" /></a>
+        <a href="post-incident.html" id="create-post">Create a Post</a>
+        <button id="logout">Logout</button>
+      </nav>
+      <h1>Your Reported Incidents</h1>
+
+      <ul id="incident-list">
+        <!-- Incidents will be dynamically rendered here -->
+      </ul>
+    </div>
+
+    <script>
+      const userName = "oramabo.emmanuel@gmail.com";
+      const password = "x2ZW eR7G 3ifQ d3dp 61M3 pyGb";
+
+      const user = JSON.parse(localStorage.getItem("user"));
+      const author = user?.databaseId;
+
+      if (!author) {
+        alert("Missing Author ID.");
+      } else {
+        // Base64 encode credentials
+        const encodedCredentials = btoa(`${userName}:${password}`);
+
+        // Fetch incidents from the server
+        fetch(
+          `https://showstoppermusicng.com/wp-json/wp/v2/incident?author=${author}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Basic ${encodedCredentials}`,
+            },
+          }
+        )
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+            return res.json();
+          })
+          .then((data) => {
+            renderIncidents(data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Failed to fetch incidents. Please try again later.");
+          });
+      }
+
+      // Function to render incidents
+      function renderIncidents(incidents) {
+        const incidentList = document.getElementById("incident-list");
+
+        if (!Array.isArray(incidents) || incidents.length === 0) {
+          incidentList.innerHTML = "<li>No incidents to display.</li>";
+          return;
+        }
+
+        incidents.forEach((incident) => {
+          const listItem = document.createElement("li");
+          listItem.className = "report-card";
+
+          const incidentImage = incident.featured_media || ""; // Adjust based on actual API response
+          const { title, content } = incident || {};
+
+          listItem.innerHTML = `
+            <div class="report-header">
+              <h3>${title.rendered || "Untitled Incident"}</h3>
+              <span class="status">${
+                content.rendered || "No content provided"
+              }</span>
+            </div>
+            <div class="report-meta">
+              <small>Submitted by: ${incident.author?.firstName || "Unknown"} ${
+            incident.author?.lastName || ""
+          }</small>
+              <br>
+              <small>Date: ${new Date(
+                incident.date
+              ).toLocaleDateString()}</small>
+            </div>
+          `;
+
+          incidentList.appendChild(listItem);
+        });
+      }
+
+      // Logout functionality
+      document.getElementById("logout").addEventListener("click", () => {
+        localStorage.removeItem("user"); // Clear user data
+        alert("You have been logged out.");
+        window.location.href = "http://localhost:8000/index.html"; // Redirect to the login page or home
+      });
+    </script>
+    <script src="../js/auth.js"></script>
+  </body>
+</html>

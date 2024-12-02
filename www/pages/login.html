@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Login</title>
+    <link rel="stylesheet" href="../css/index.css" />
+  </head>
+  <body>
+    <div class="login-container">
+      <a class="authorize" href="../index.html"><img src="../img/plex-chevron.png" height="50" alt="Logo" /></a>
+      <h1>Login</h1>
+      <form id="login-form">
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <a href="./user_post.html">
+          <button type="submit">Login</button>
+        </a>
+      </form>
+      <a href="register.html">Don't have an account? Register</a>
+    </div>
+    <script>
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+
+          const variables = {
+            clientMutationId: "default_client_id",
+            username: email, // assuming username is the same as email
+            password: password,
+          };
+
+          const query = `
+        mutation login($username: String!, $password: String!, $clientMutationId: String = "10") {
+          login(
+            input: {provider: PASSWORD, credentials: {username: $username, password: $password}, clientMutationId: $clientMutationId}
+          ) {
+            authToken
+            refreshToken
+            clientMutationId
+            user {
+              databaseId
+              username
+              email
+              firstName
+              lastName
+            }
+          }
+        }
+        `;
+
+          fetch("https://showstoppermusicng.com/graphql", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              query,
+              variables,
+            }),
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              if (result.data && result.data.login) {
+                // Save authToken and user data
+                localStorage.setItem("authToken", result.data.login.authToken);
+                localStorage.setItem(
+                  "user",
+                  JSON.stringify(result.data.login.user)
+                );
+
+                // Redirect to user-specific interface
+                window.location.href = "user_post.html";
+              } else {
+                alert("Login failed. Please check your credentials.");
+              }
+            })
+            .catch((error) => console.error("Error:", error));
+        });
+    </script>
+
+    <script src="../js/auth.js"></script>
+  </body>
+</html>

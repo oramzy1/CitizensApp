@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Home</title>
+    <link rel="stylesheet" href="./css/index.css" />
+  </head>
+  <body>
+    <div class="home-container">
+      <nav>
+        <a href="./index.html"><img src="../img/plex-chevron.png" height="50" alt="Logo" /></a>
+        <h2>Incident Reports App</h2>
+        <a href="./pages/login.html">Login</a>
+      </nav>
+      <h1>All Incidents</h1>
+
+      <ul id="incident-list">
+        <!-- Incidents will be dynamically rendered here -->
+      </ul>
+    </div>
+
+    <script>
+      function convertData(dateGmt) {
+        const date = new Date(dateGmt);
+        return date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          timeZone: "UTC",
+          timeZoneName: "short",
+        });
+      }
+
+      // Fetch and render incidents dynamically
+      const query = `
+        query MyQuery {
+            incidents {
+                nodes {
+                title(format: RENDERED)
+                status
+                author {
+                    node {
+                    email
+                    databaseId
+                    firstName
+                    lastName
+                    username
+                    roles {
+                        nodes {
+                        name
+                        }
+                    }
+                    }
+                }
+                content(format: RENDERED)
+                databaseId
+                authorId
+                dateGmt
+                featuredImage {
+                    node {
+                    sourceUrl(size: LARGE)
+                    }
+                }
+            }
+        }
+    }
+    `;
+
+      fetch("https://showstoppermusicng.com/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query }),
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.data) {
+            const data = result.data.incidents.nodes;
+            const incidents = localStorage.setItem(
+              "incidents",
+              JSON.stringify(data)
+            );
+            const localIncident = JSON.parse(localStorage.getItem("incidents"));
+            renderIncidents(localIncident);
+          } else {
+            console.error("Failed to fetch incidents.");
+            const localIncident = JSON.parse(localStorage.getItem("incidents"));
+            renderIncidents(localIncident);
+          }
+        })
+        .catch((error) => console.error("Error:", error));
+
+      // Render incidents in the DOM
+      function renderIncidents(incidents) {
+        const incidentList = document.getElementById("incident-list");
+
+        if (incidents.length === 0) {
+          incidentList.innerHTML = "<li>No incidents to display.</li>";
+          return;
+        }
+
+        incidents.forEach((incident) => {
+          const listItem = document.createElement("li");
+          listItem.className = "report-card";
+          const incidentImage = incident.featuredImage?.node.sourceUrl; // Correct reference to incident.featuredImage
+
+          const { content, title, dateGmt } = incident || {};
+          listItem.innerHTML = `
+          <div class="report-header">
+            <h3>${title}</h3>
+            <span class="status">${content}</span>
+          </div>
+          <div class="report-meta">
+            <small>Submitted by: ${
+              incident.author.node.firstName || "Unknown"
+            } ${incident.author.node.lastName || "Un"} (${
+            incident.author.node.email || "No email"
+          })</small>
+            <br>
+            <small>Date: ${convertData(dateGmt)}</small>
+          </div>
+        `;
+
+          incidentList.appendChild(listItem);
+        });
+      }
+    </script>
+  </body>
+</html>

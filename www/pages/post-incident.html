@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Post Incident</title>
+    <link rel="stylesheet" href="../css/post.css" />
+  </head>
+  <body>
+    <div class="form-container">
+      <h1>Post a New Incident</h1>
+      <form id="incident-form">
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            placeholder="Enter incident title"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            placeholder="Enter incident description"
+            required
+          ></textarea>
+        </div>
+        <!-- <div class="form-group">
+          <label for="image">Image</label>
+          <input
+            type="file"
+            id="image"
+            name="image"
+            accept="image/*"
+            required
+          />
+        </div> -->
+        <button type="submit">Post Incident</button>
+      </form>
+    </div>
+
+    <script>
+      // Handle form submission
+      document
+        .getElementById("incident-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const query = `
+            mutation createIncident($content: String = "", $title: String = "", $clientMutationId: String = "") {
+                  createIncident(
+                      input: {content: $content, title: $title, clientMutationId: $clientMutationId}
+                  ) {
+                      incident {
+                      featuredImage {
+                          node {
+                          sourceUrl
+                          }
+                      }
+                      title(format: RENDERED)
+                      content(format: RENDERED)
+                      }
+                    }
+                  }`;
+
+          const title = document.getElementById("title").value;
+          const description = document.getElementById("description").value;
+
+          if (!title || !description) {
+            alert("Please fill all the fields.");
+            return;
+          }
+
+          const userName = "oramabo.emmanuel@gmail.com";
+          const password = "x2ZW eR7G 3ifQ d3dp 61M3 pyGb";
+
+          const author = JSON.parse(localStorage.getItem("user"))?.databaseId;
+
+          if (!author) {
+            alert("Missing Author ID.");
+            return;
+          }
+
+          const variables = {
+            author: author,
+            status: "publish",
+            title: title,
+            content: description,
+          };
+
+          // Base64 encode credentials
+          const encodedCredentials = btoa(`${userName}:${password}`);
+
+          // Send the data to the server (WordPress or your backend API)
+          fetch("https://showstoppermusicng.com/wp-json/wp/v2/incident", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Basic ${encodedCredentials}`,
+            },
+            body: JSON.stringify({
+              title: title, // Title of the incident
+              content: description, // Description (content) of the incident
+              status: "publish",
+              author: author,
+            }),
+          })
+            .then((res) => {
+              if (!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+              }
+              return res.json();
+            })
+            .then((result) => {
+              alert("Incident posted successfully.");
+              window.location.href = "http://localhost:8000/pages/user_post.html"; // Redirect to home or incident list page
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert(
+                "Failed to post incident. Please check your data and try again."
+              );
+            });
+        });
+    </script>
+  </body>
+</html>
