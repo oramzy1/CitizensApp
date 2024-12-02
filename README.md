@@ -1,4 +1,5 @@
 PROJECT OVERVIEW
+
 PROJECT NAME: Incident Reports App
 
 The application is a user-centric incident reporting platform designed for individuals to report and manage incidents. It integrates a WordPress backend containerized using Docker, a Cordova-based mobile-friendly frontend, and GraphQL and REST APIs for seamless communication between the client and server.
