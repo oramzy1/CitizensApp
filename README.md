@@ -25,7 +25,7 @@ FEATURES
 5. Secure API Integration
 -   Backend communication secured using Base64-encoded authentication.
 
-Technologies Used
+TECHNOLOGIES USED
 1. Frontend
 -   Cordova: Used to containerize the web application for deployment on mobile devices.
 -   HTML, CSS, and JavaScript: Core technologies for creating a dynamic and user-friendly interface.
